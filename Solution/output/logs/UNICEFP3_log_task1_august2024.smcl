@@ -1,0 +1,1195 @@
+{smcl}
+{com}{sf}{ul off}{txt}{.-}
+      name:  {res}<unnamed>
+       {txt}log:  {res}C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/output/logs/UNICEFP3_log_task1_august2024.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res}20 Aug 2024, 15:28:53
+{txt}
+{com}. /***********************************************
+> 
+> UNICEF - P3 Statistics & Monitoring specialist Test
+> 
+> Date: 19 August 2024
+> Objective: Solution TASK 1
+> 
+> ***********************************************/
+. 
+. ***********************************************
+. *       Contents
+. ***********************************************
+.                 *(1.0) Task 1
+.                         *1.1 import data
+.                         *1.2 merge datasets
+.                         *1.3 population-weighted coverage for on-track and off-track countries for ANC4 
+.                         *1.4 population-weighted coverage for on-track and off-track countries for SAB 
+.                         *1.5 Graph 
+.                 
+.                 
+. ************************************************
+. *(1.0) Task 1
+. ************************************************
+. 
+. 
+.         * 1.1 import and clean datasets
+.  
+.                 * Import UNICEF Global Data Repository
+.                 import excel using "$data_raw/GLOBAL_DATAFLOW_2018-2022.xlsx", sheet("Unicef data") cellrange("A1:U448") firstrow clear 
+{res}{text}(21 vars, 447 obs)
+
+{com}.                 
+.                 desc 
+
+{txt}Contains data
+  obs:{res}           447                          
+{txt} vars:{res}            21                          
+{txt}{hline}
+              storage   display    value
+variable name   type    format     label      variable label
+{hline}
+{p 0 48}{res}{bind:Geographicarea }{txt}{bind: str39   }{bind:{txt}%39s      }{space 1}{bind:         }{bind:  }{res}{res}Geographic area{p_end}
+{p 0 48}{bind:Indicator      }{txt}{bind: str127  }{bind:{txt}%127s     }{space 1}{bind:         }{bind:  }{res}{res}Indicator{p_end}
+{p 0 48}{bind:Sex            }{txt}{bind: str6    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}Sex{p_end}
+{p 0 48}{bind:TIME_PERIOD    }{txt}{bind: str4    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}TIME_PERIOD{p_end}
+{p 0 48}{bind:OBS_VALUE      }{txt}{bind: str4    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}OBS_VALUE{p_end}
+{p 0 48}{bind:Unitmultiplier }{txt}{bind: str5    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}Unit multiplier{p_end}
+{p 0 48}{bind:Unitofmeasure  }{txt}{bind: str1    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}Unit of measure{p_end}
+{p 0 48}{bind:ObservationSt~s}{txt}{bind: str10   }{bind:{txt}%10s      }{space 1}{bind:         }{bind:  }{res}{res}Observation Status{p_end}
+{p 0 48}{bind:Observationco~y}{txt}{bind: str4    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}Observation confidentaility{p_end}
+{p 0 48}{bind:LOWER_BOUND    }{txt}{bind: byte    }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}LOWER_BOUND{p_end}
+{p 0 48}{bind:UPPER_BOUND    }{txt}{bind: byte    }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}UPPER_BOUND{p_end}
+{p 0 48}{bind:WGTD_SAMPL_SIZE}{txt}{bind: byte    }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}WGTD_SAMPL_SIZE{p_end}
+{p 0 48}{bind:OBS_FOOTNOTE   }{txt}{bind: str228  }{bind:{txt}%228s     }{space 1}{bind:         }{bind:  }{res}{res}OBS_FOOTNOTE{p_end}
+{p 0 48}{bind:SERIES_FOOTNOTE}{txt}{bind: byte    }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}SERIES_FOOTNOTE{p_end}
+{p 0 48}{bind:DATA_SOURCE    }{txt}{bind: str521  }{bind:{txt}%521s     }{space 1}{bind:         }{bind:  }{res}{res}DATA_SOURCE{p_end}
+{p 0 48}{bind:SOURCE_LINK    }{txt}{bind: str156  }{bind:{txt}%156s     }{space 1}{bind:         }{bind:  }{res}{res}SOURCE_LINK{p_end}
+{p 0 48}{bind:CUSTODIAN      }{txt}{bind: byte    }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}CUSTODIAN{p_end}
+{p 0 48}{bind:Timeperiodact~o}{txt}{bind: str16   }{bind:{txt}%16s      }{space 1}{bind:         }{bind:  }{res}{res}Time period activity related to when the data are collected{p_end}
+{p 0 48}{bind:REF_PERIOD     }{txt}{bind: byte    }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}REF_PERIOD{p_end}
+{p 0 48}{bind:COVERAGE_TIME  }{txt}{bind: str9    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}COVERAGE_TIME{p_end}
+{p 0 48}{bind:Currentage     }{txt}{bind: str18   }{bind:{txt}%18s      }{space 1}{bind:         }{bind:  }{res}{res}Current age{p_end}
+{txt}{hline}
+Sorted by: 
+{res}     Note: Dataset has changed since last saved.
+{txt}
+{com}.                 
+.                 destring  TIME_PERIOD OBS_VALUE, replace 
+{txt}TIME_PERIOD: all characters numeric; {res}replaced {txt}as {res}int
+{txt}OBS_VALUE: all characters numeric; {res}replaced {txt}as {res}double
+{txt}
+{com}.                 ta ObservationStatus
+
+{txt}Observation {c |}
+     Status {c |}      Freq.     Percent        Cum.
+{hline 12}{c +}{hline 35}
+ Reanalysed {c |}{res}         75       16.78       16.78
+{txt}   Reported {c |}{res}        372       83.22      100.00
+{txt}{hline 12}{c +}{hline 35}
+      Total {c |}{res}        447      100.00
+{txt}
+{com}.                 
+.                 * encode var ObservationStatus Sex
+.                 local varlist ObservationStatus Sex Indicator
+{txt}
+{com}.                 foreach var in  `varlist' {c -(}
+{txt}  2{com}.                         encode `var', gen(`var'_encoded)
+{txt}  3{com}.                         drop `var'  // drop string variable
+{txt}  4{com}.                 {c )-}
+{txt}
+{com}.                 
+.                 * drop variables with all missing observations (LOWER_BOUND, UPPER_BOUND, WGTD_SAMPL_SIZE, SERIES_FOOTNOTE, CUSTODIAN, REF_PERIOD)
+.                  foreach var of varlist _all {c -(}
+{txt}  2{com}.                    capture assert mi(`var')
+{txt}  3{com}.                          if !_rc {c -(}
+{txt}  4{com}.                                 di "`var'"
+{txt}  5{com}.                                 drop `var'
+{txt}  6{com}.                          {c )-}
+{txt}  7{com}.                 {c )-}
+LOWER_BOUND
+UPPER_BOUND
+WGTD_SAMPL_SIZE
+SERIES_FOOTNOTE
+CUSTODIAN
+REF_PERIOD
+{txt}
+{com}.                 
+.                 rename Geographicarea OfficialName
+{res}{txt}
+{com}.                 
+.                 * Keep all 142 countires since the time period of the indicator value for ANC4 and SAB is within the time period 2018-2022 for each country in the dataset 
+.                  ta TIME_PERIOD 
+
+{txt}TIME_PERIOD {c |}      Freq.     Percent        Cum.
+{hline 12}{c +}{hline 35}
+       2018 {c |}{res}        132       29.53       29.53
+{txt}       2019 {c |}{res}        116       25.95       55.48
+{txt}       2020 {c |}{res}         78       17.45       72.93
+{txt}       2021 {c |}{res}         40        8.95       81.88
+{txt}       2022 {c |}{res}         81       18.12      100.00
+{txt}{hline 12}{c +}{hline 35}
+      Total {c |}{res}        447      100.00
+{txt}
+{com}.                 
+.                 *Keep only the most recent observation of ANC4 and SAB indicator
+.                 assert !missing(OfficialName)
+{txt}
+{com}.                 bysort OfficialName: egen max_time_period = max(TIME_PERIOD)
+{txt}
+{com}.                 keep if max_time_period == TIME_PERIOD 
+{txt}(169 observations deleted)
+
+{com}. 
+.                 
+.                 * keep relevant variables
+.                 keep   OfficialName Indicator_encoded TIME_PERIOD OBS_VALUE  ObservationStatus Sex
+{txt}
+{com}.                 label define indicator_2 ///
+>                          1 "ANC4" ///
+>                          2 "SAB"
+{txt}
+{com}.                 label value  Indicator_encoded indicator_2
+{txt}
+{com}.                 
+.                 
+.                 * save intermediate dataset 
+.                 preserve 
+{txt}
+{com}.                         keep if Indicator_encoded == 1 
+{txt}(155 observations deleted)
+
+{com}.                         save "$data_int/ANC4.dta", replace
+{txt}file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/data/intermediate/ANC4.dta saved
+
+{com}.                 restore
+{txt}
+{com}.                 
+.                 preserve 
+{txt}
+{com}.                         keep if Indicator_encoded == 2
+{txt}(123 observations deleted)
+
+{com}.                         save "$data_int/SAB.dta", replace
+{txt}file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/data/intermediate/SAB.dta saved
+
+{com}.                 restore
+{txt}
+{com}.                 
+.                 
+.                 * import United Nations World Population Prospects population estimates
+.                 import excel using "$data_raw/WPP2022_GEN_F01_DEMOGRAPHIC_INDICATORS_COMPACT_REV1.xlsx", sheet("Projections") cellrange("A17:BM22615") clear firstrow
+{res}{text}(65 vars, 22,598 obs)
+
+{com}.         
+.                 desc
+
+{txt}Contains data
+  obs:{res}        22,598                          
+{txt} vars:{res}            65                          
+{txt}{hline}
+              storage   display    value
+variable name   type    format     label      variable label
+{hline}
+{p 0 48}{res}{bind:Index          }{txt}{bind: int     }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}Index{p_end}
+{p 0 48}{bind:Variant        }{txt}{bind: str6    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}Variant{p_end}
+{p 0 48}{bind:Regionsubregi~r}{txt}{bind: str59   }{bind:{txt}%59s      }{space 1}{bind:         }{bind:  }{res}{res}Region, subregion, country or area *{p_end}
+{p 0 48}{bind:Notes          }{txt}{bind: str2    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}Notes{p_end}
+{p 0 48}{bind:Locationcode   }{txt}{bind: int     }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}Location code{p_end}
+{p 0 48}{bind:ISO3Alphacode  }{txt}{bind: str3    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}ISO3 Alpha-code{p_end}
+{p 0 48}{bind:ISO2Alphacode  }{txt}{bind: str2    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}ISO2 Alpha-code{p_end}
+{p 0 48}{bind:SDMXcode       }{txt}{bind: int     }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}SDMX code**{p_end}
+{p 0 48}{bind:Type           }{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Type{p_end}
+{p 0 48}{bind:Parentcode     }{txt}{bind: int     }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}Parent code{p_end}
+{p 0 48}{bind:Year           }{txt}{bind: int     }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}Year{p_end}
+{p 0 48}{bind:TotalPopulati~r}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Total Population, as of 1 January (thousands){p_end}
+{p 0 48}{bind:TotalPopulati~y}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Total Population, as of 1 July (thousands){p_end}
+{p 0 48}{bind:MalePopulatio~t}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Male Population, as of 1 July (thousands){p_end}
+{p 0 48}{bind:FemalePopulat~y}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Female Population, as of 1 July (thousands){p_end}
+{p 0 48}{bind:PopulationDen~y}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Population Density, as of 1 July (persons per square km){p_end}
+{p 0 48}{bind:PopulationSex~u}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Population Sex Ratio, as of 1 July (males per 100 females){p_end}
+{p 0 48}{bind:MedianAgeasof~s}{txt}{bind: str6    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}Median Age, as of 1 July (years){p_end}
+{p 0 48}{bind:NaturalChange~a}{txt}{bind: str18   }{bind:{txt}%18s      }{space 1}{bind:         }{bind:  }{res}{res}Natural Change, Births minus Deaths (thousands){p_end}
+{p 0 48}{bind:RateofNatur~100}{txt}{bind: str18   }{bind:{txt}%18s      }{space 1}{bind:         }{bind:  }{res}{res}Rate of Natural Change (per 1,000 population){p_end}
+{p 0 48}{bind:PopulationCha~s}{txt}{bind: str18   }{bind:{txt}%18s      }{space 1}{bind:         }{bind:  }{res}{res}Population Change (thousands){p_end}
+{p 0 48}{bind:PopulationGro~a}{txt}{bind: str18   }{bind:{txt}%18s      }{space 1}{bind:         }{bind:  }{res}{res}Population Growth Rate (percentage){p_end}
+{p 0 48}{bind:PopulationAnn~e}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Population Annual Doubling Time (years){p_end}
+{p 0 48}{bind:Birthsthousands}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Births (thousands){p_end}
+{p 0 48}{bind:Birthsbywom~19t}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Births by women aged 15 to 19 (thousands){p_end}
+{p 0 48}{bind:CrudeBirthRa~10}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Crude Birth Rate (births per 1,000 population){p_end}
+{p 0 48}{bind:TotalFertilit~h}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Total Fertility Rate (live births per woman){p_end}
+{p 0 48}{bind:NetReproducti~g}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Net Reproduction Rate (surviving daughters per woman){p_end}
+{p 0 48}{bind:MeanAgeChildb~s}{txt}{bind: str6    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}Mean Age Childbearing (years){p_end}
+{p 0 48}{bind:SexRatioatBi~10}{txt}{bind: str5    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}Sex Ratio at Birth (males per 100 female births){p_end}
+{p 0 48}{bind:TotalDeathsth~s}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Total Deaths (thousands){p_end}
+{p 0 48}{bind:MaleDeathstho~s}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Male Deaths (thousands){p_end}
+{p 0 48}{bind:FemaleDeathst~s}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Female Deaths (thousands){p_end}
+{p 0 48}{bind:CrudeDeathRa~10}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Crude Death Rate (deaths per 1,000 population){p_end}
+{p 0 48}{bind:LifeExpectanc~s}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Life Expectancy at Birth, both sexes (years){p_end}
+{p 0 48}{bind:MaleLifeExpec~y}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Male Life Expectancy at Birth (years){p_end}
+{p 0 48}{bind:FemaleLifeExp~h}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Female Life Expectancy at Birth (years){p_end}
+{p 0 48}{bind:LifeExpe~15both}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Life Expectancy at Age 15, both sexes (years){p_end}
+{p 0 48}{bind:MaleLifeExpe~15}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Male Life Expectancy at Age 15 (years){p_end}
+{p 0 48}{bind:FemaleLifeEx~15}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Female Life Expectancy at Age 15 (years){p_end}
+{p 0 48}{bind:LifeExpe~65both}{txt}{bind: str6    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}Life Expectancy at Age 65, both sexes (years){p_end}
+{p 0 48}{bind:MaleLifeExpe~65}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Male Life Expectancy at Age 65 (years){p_end}
+{p 0 48}{bind:FemaleLifeEx~65}{txt}{bind: str6    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}Female Life Expectancy at Age 65 (years){p_end}
+{p 0 48}{bind:LifeExpec~0both}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Life Expectancy at Age 80, both sexes (years){p_end}
+{p 0 48}{bind:MaleLifeExpe~80}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Male Life Expectancy at Age 80 (years){p_end}
+{p 0 48}{bind:FemaleLifeEx~80}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Female Life Expectancy at Age 80 (years){p_end}
+{p 0 48}{bind:InfantDeathsu~u}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Infant Deaths, under age 1 (thousands){p_end}
+{p 0 48}{bind:InfantMortali~e}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Infant Mortality Rate (infant deaths per 1,000 live births){p_end}
+{p 0 48}{bind:LiveBirthsSur~1}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Live Births Surviving to Age 1 (thousands){p_end}
+{p 0 48}{bind:UnderFiveDeat~5}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Under-Five Deaths, under age 5 (thousands){p_end}
+{p 0 48}{bind:UnderFiveMort~d}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Under-Five Mortality (deaths under age 5 per 1,000 live births){p_end}
+{p 0 48}{bind:Mortal~40bothse}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Mortality before Age 40, both sexes (deaths under age 40 per 1,000 live births){p_end}
+{p 0 48}{bind:MaleMortal~40de}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Male Mortality before Age 40 (deaths under age 40 per 1,000 male live births){p_end}
+{p 0 48}{bind:FemaleMortal~40}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Female Mortality before Age 40 (deaths under age 40 per 1,000 female live births{p_end}
+{p 0 48}{bind:Mortal~60bothse}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Mortality before Age 60, both sexes (deaths under age 60 per 1,000 live births){p_end}
+{p 0 48}{bind:MaleMortal~60de}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Male Mortality before Age 60 (deaths under age 60 per 1,000 male live births){p_end}
+{p 0 48}{bind:FemaleMortal~60}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Female Mortality before Age 60 (deaths under age 60 per 1,000 female live births{p_end}
+{p 0 48}{bind:Mortalitybet~50}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Mortality between Age 15 and 50, both sexes (deaths under age 50 per 1,000 alive{p_end}
+{p 0 48}{bind:MaleMortality~n}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Male Mortality between Age 15 and 50 (deaths under age 50 per 1,000 males alive {p_end}
+{p 0 48}{bind:FemaleMortal~15}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Female Mortality between Age 15 and 50 (deaths under age 50 per 1,000 females al{p_end}
+{p 0 48}{bind:Mortalitybet~60}{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Mortality between Age 15 and 60, both sexes (deaths under age 60 per 1,000 alive{p_end}
+{p 0 48}{bind:BJ             }{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Male Mortality between Age 15 and 60 (deaths under age 60 per 1,000 males alive {p_end}
+{p 0 48}{bind:BK             }{txt}{bind: str17   }{bind:{txt}%17s      }{space 1}{bind:         }{bind:  }{res}{res}Female Mortality between Age 15 and 60 (deaths under age 60 per 1,000 females al{p_end}
+{p 0 48}{bind:NetNumberofMi~d}{txt}{bind: str18   }{bind:{txt}%18s      }{space 1}{bind:         }{bind:  }{res}{res}Net Number of Migrants (thousands){p_end}
+{p 0 48}{bind:NetMigrationR~o}{txt}{bind: str18   }{bind:{txt}%18s      }{space 1}{bind:         }{bind:  }{res}{res}Net Migration Rate (per 1,000 population){p_end}
+{txt}{hline}
+Sorted by: 
+{res}     Note: Dataset has changed since last saved.
+{txt}
+{com}.                 
+.                 * drop variables with all missing observations (NO VARIABLES DROPPED)
+.                  foreach var of varlist _all {c -(}
+{txt}  2{com}.                    capture assert mi(`var')
+{txt}  3{com}.                          if !_rc {c -(}
+{txt}  4{com}.                                 di "`var'"
+{txt}  5{com}.                                 drop `var'
+{txt}  6{com}.                          {c )-}
+{txt}  7{com}.                 {c )-}
+{txt}
+{com}.                 
+.                 * rename according to dataset name
+.                 rename (BJ BK) (MaleMortalitybetweenAge15and60 FemaleMortalitybetweenAge15and60)
+{res}{txt}
+{com}.                 
+.                 * drop line for aggregate region
+.                 drop if Regionsubregioncountryorar == "Sustainable Development Goal (SDG) regions" | Regionsubregioncountryorar == "UN development groups" | Regionsubregioncountryorar == "World Bank income groups" | Regionsubregioncountryorar == "Geographic regions" 
+{txt}(4 observations deleted)
+
+{com}.                 
+.                 * replace string value with missing for all numeric variables
+.                 foreach var of varlist TotalPopulationasof1Januar-NetMigrationRateper1000po {c -(} 
+{txt}  2{com}.     replace `var' = "" if `var' == "..."
+{txt}  3{com}. {c )-}
+{txt}(0 real changes made)
+(0 real changes made)
+(79 real changes made)
+(79 real changes made)
+(0 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(0 real changes made)
+(0 real changes made)
+(15,194 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+(79 real changes made)
+
+{com}.                 * destring all pulation projections
+.                 destring TotalPopulationasof1Januar-NetMigrationRateper1000po, replace  
+{txt}TotalPopulationasof1Januar: all characters numeric; {res}replaced {txt}as {res}double
+{txt}TotalPopulationasof1July: all characters numeric; {res}replaced {txt}as {res}double
+{txt}MalePopulationasof1Julyt: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}FemalePopulationasof1July: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}PopulationDensityasof1July: all characters numeric; {res}replaced {txt}as {res}double
+{txt}PopulationSexRatioasof1Ju: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MedianAgeasof1Julyyears: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}NaturalChangeBirthsminusDea: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}RateofNaturalChangeper100: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}PopulationChangethousands: all characters numeric; {res}replaced {txt}as {res}double
+{txt}PopulationGrowthRatepercenta: all characters numeric; {res}replaced {txt}as {res}double
+{txt}PopulationAnnualDoublingTime: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(15194 missing values generated)
+{res}{txt}Birthsthousands: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}Birthsbywomenaged15to19t: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}CrudeBirthRatebirthsper10: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}TotalFertilityRatelivebirth: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}NetReproductionRatesurviving: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MeanAgeChildbearingyears: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}SexRatioatBirthmalesper10: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}TotalDeathsthousands: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MaleDeathsthousands: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}FemaleDeathsthousands: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}CrudeDeathRatedeathsper10: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}LifeExpectancyatBirthboths: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MaleLifeExpectancyatBirthy: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}FemaleLifeExpectancyatBirth: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}LifeExpectancyatAge15both: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MaleLifeExpectancyatAge15: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}FemaleLifeExpectancyatAge15: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}LifeExpectancyatAge65both: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MaleLifeExpectancyatAge65: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}FemaleLifeExpectancyatAge65: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}LifeExpectancyatAge80both: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MaleLifeExpectancyatAge80: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}FemaleLifeExpectancyatAge80: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}InfantDeathsunderage1thou: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}InfantMortalityRateinfantde: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}LiveBirthsSurvivingtoAge1: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}UnderFiveDeathsunderage5: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}UnderFiveMortalitydeathsund: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MortalitybeforeAge40bothse: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MaleMortalitybeforeAge40de: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}FemaleMortalitybeforeAge40: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MortalitybeforeAge60bothse: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MaleMortalitybeforeAge60de: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}FemaleMortalitybeforeAge60: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MortalitybetweenAge15and50: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MaleMortalitybetweenAge15an: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}FemaleMortalitybetweenAge15: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MortalitybetweenAge15and60: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}MaleMortalitybetweenAge15and60: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}FemaleMortalitybetweenAge15and60: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}NetNumberofMigrantsthousand: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}NetMigrationRateper1000po: all characters numeric; {res}replaced {txt}as {res}double
+{txt}(79 missing values generated)
+{res}{txt}
+{com}.                 
+.                 encode Type , gen(type_encoded)
+{txt}
+{com}.                 drop Type
+{txt}
+{com}.                 
+.                 sort Regionsubregioncountryorar
+{txt}
+{com}.                 
+.                 *drop aggregate estimates 
+.                 drop if ISO3Alphacode == ""
+{txt}(3,871 observations deleted)
+
+{com}.                 unique ISO3Alphacode // 237 country in the record
+{txt}Number of unique values of ISO3Alphacode is  {res}237
+{txt}Number of records is  {res}18723
+{txt}
+{com}.                 rename ISO3Alphacode ISO3Code
+{res}{txt}
+{com}.                 
+.                 replace ISO3Code = "RKS" if ISO3Code == "XKX" // replaced ISO3Code for Kosovo because ISO3Alphacode is different than under five mortality dataset 
+{txt}(79 real changes made)
+
+{com}.                 keep if Year == 2022 // keep only year 2022 as per the task instructions
+{txt}(18,486 observations deleted)
+
+{com}.                 count 
+  {res}237
+{txt}
+{com}.                 assert _N == 237
+{txt}
+{com}.                 
+.                 * save intermediate dataset 
+.                 save "$data_int/pop_projection.dta", replace
+{txt}file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/data/intermediate/pop_projection.dta saved
+
+{com}. 
+.                 
+. 
+.                 * import Under-five mortality on-track and off-track classifications
+.                 import excel using "$data_raw/On-track and off-track countries.xlsx", sheet("Sheet1") clear firstrow
+{res}{text}(3 vars, 200 obs)
+
+{com}.                 
+.                 desc
+
+{txt}Contains data
+  obs:{res}           200                          
+{txt} vars:{res}             3                          
+{txt}{hline}
+              storage   display    value
+variable name   type    format     label      variable label
+{hline}
+{p 0 48}{res}{bind:ISO3Code       }{txt}{bind: str3    }{bind:{txt}%9s       }{space 1}{bind:         }{bind:  }{res}{res}ISO3Code{p_end}
+{p 0 48}{bind:OfficialName   }{txt}{bind: str37   }{bind:{txt}%37s      }{space 1}{bind:         }{bind:  }{res}{res}OfficialName{p_end}
+{p 0 48}{bind:StatusU5MR     }{txt}{bind: str19   }{bind:{txt}%19s      }{space 1}{bind:         }{bind:  }{res}{res}Status.U5MR{p_end}
+{txt}{hline}
+Sorted by: 
+{res}     Note: Dataset has changed since last saved.
+{txt}
+{com}.                 
+.                 encode StatusU5MR, gen (statusu5mr_encoded) 
+{txt}
+{com}.                 drop StatusU5MR
+{txt}
+{com}.                 
+.                 unique ISO3Code 
+{txt}Number of unique values of ISO3Code is  {res}200
+{txt}Number of records is  {res}200
+{txt}
+{com}.                 local _N = r(unique)
+{txt}
+{com}.                 
+.                 * save intermediate dataset 
+.                 save "$data_int/u5mr.dta", replace
+{txt}file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/data/intermediate/u5mr.dta saved
+
+{com}.         
+.         
+.         *1.2 merge datasets
+.         
+.                 use "$data_int/u5mr.dta", clear // use the list of countries with on-track and off-track data as master list
+{txt}
+{com}. 
+.                 * merge with population estimates
+.                 merge 1:m ISO3Code using "$data_int/pop_projection.dta" // the dataset with the population estimates contains more countries than the master. Keep only exact matches
+{res}
+{txt}{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}              37
+{txt}{col 9}from master{col 30}{res}               0{txt}  (_merge==1)
+{col 9}from using{col 30}{res}              37{txt}  (_merge==2)
+
+{col 5}matched{col 30}{res}             200{txt}  (_merge==3)
+{col 5}{hline 41}
+
+{com}.                 
+.                 unique ISO3Code if _merge == 3
+{txt}Number of unique values of ISO3Code is  {res}200
+{txt}Number of records is  {res}200
+{txt}
+{com}.                 local _N_merge = r(unique)
+{txt}
+{com}.                 drop _merge
+{txt}
+{com}.                 
+.                 * check that all countries have an exact match
+.                 assert `_N' == `_N_merge'
+{txt}
+{com}.                 
+.                 * check that offical name of the countries in the two dataset matches 
+.                 gen check_off_name = OfficialName == Regionsubregioncountryorar
+{txt}
+{com}.                 
+.                 * Identify countries with Offical Name missmatch - decide to use OfficalName for the merge with ANC4 and SAB because name of the country matches wth OfficalName variable
+.                 preserve        
+{txt}
+{com}.                         keep OfficialName Regionsubregioncountryorar check_off_name
+{txt}
+{com}.                         duplicates drop 
+
+{p 0 4}{txt}Duplicates in terms of {txt} all variables{p_end}
+
+(0 observations are duplicates)
+
+{com}.                         list OfficialName Regionsubregioncountryorar if check_off_name == 0 
+{txt}
+     {c TLC}{hline 39}{c -}{hline 34}{c TRC}
+     {c |} {res}                         OfficialName         Regionsubregioncountryorar {txt}{c |}
+     {c LT}{hline 39}{c -}{hline 34}{c RT}
+ 62. {c |} {res}     Micronesia (Federated States of)        Micronesia (Fed. States of) {txt}{c |}
+132. {c |} {res}         Netherlands (Kingdom of the)                        Netherlands {txt}{c |}
+145. {c |} {res}Democratic People's Republic of Korea    Dem. People's Republic of Korea {txt}{c |}
+150. {c |} {res}                  Kosovo (UNSCR 1244)      Kosovo (under UNSC res. 1244) {txt}{c |}
+189. {c |} {res}                        United States           United States of America {txt}{c |}
+     {c LT}{hline 39}{c -}{hline 34}{c RT}
+201. {c |} {res}                                                                   Aruba {txt}{c |}
+202. {c |} {res}                                                          American Samoa {txt}{c |}
+203. {c |} {res}                                        Bonaire, Sint Eustatius and Saba {txt}{c |}
+204. {c |} {res}                                                        Saint Barthélemy {txt}{c |}
+205. {c |} {res}                                                                 Bermuda {txt}{c |}
+     {c LT}{hline 39}{c -}{hline 34}{c RT}
+206. {c |} {res}                                                                 Curaçao {txt}{c |}
+207. {c |} {res}                                                          Cayman Islands {txt}{c |}
+208. {c |} {res}                                                          Western Sahara {txt}{c |}
+209. {c |} {res}                                             Falkland Islands (Malvinas) {txt}{c |}
+210. {c |} {res}                                                           Faroe Islands {txt}{c |}
+     {c LT}{hline 39}{c -}{hline 34}{c RT}
+211. {c |} {res}                                                                Guernsey {txt}{c |}
+212. {c |} {res}                                                               Gibraltar {txt}{c |}
+213. {c |} {res}                                                              Guadeloupe {txt}{c |}
+214. {c |} {res}                                                               Greenland {txt}{c |}
+215. {c |} {res}                                                           French Guiana {txt}{c |}
+     {c LT}{hline 39}{c -}{hline 34}{c RT}
+216. {c |} {res}                                                                    Guam {txt}{c |}
+217. {c |} {res}                                                    China, Hong Kong SAR {txt}{c |}
+218. {c |} {res}                                                             Isle of Man {txt}{c |}
+219. {c |} {res}                                                                  Jersey {txt}{c |}
+220. {c |} {res}                                                           Liechtenstein {txt}{c |}
+     {c LT}{hline 39}{c -}{hline 34}{c RT}
+221. {c |} {res}                                                        China, Macao SAR {txt}{c |}
+222. {c |} {res}                                              Saint Martin (French part) {txt}{c |}
+223. {c |} {res}                                                Northern Mariana Islands {txt}{c |}
+224. {c |} {res}                                                              Martinique {txt}{c |}
+225. {c |} {res}                                                                 Mayotte {txt}{c |}
+     {c LT}{hline 39}{c -}{hline 34}{c RT}
+226. {c |} {res}                                                           New Caledonia {txt}{c |}
+227. {c |} {res}                                                             Puerto Rico {txt}{c |}
+228. {c |} {res}                                                        French Polynesia {txt}{c |}
+229. {c |} {res}                                                                 Réunion {txt}{c |}
+230. {c |} {res}                                                            Saint Helena {txt}{c |}
+     {c LT}{hline 39}{c -}{hline 34}{c RT}
+231. {c |} {res}                                               Saint Pierre and Miquelon {txt}{c |}
+232. {c |} {res}                                               Sint Maarten (Dutch part) {txt}{c |}
+233. {c |} {res}                                                                 Tokelau {txt}{c |}
+234. {c |} {res}                                         China, Taiwan Province of China {txt}{c |}
+235. {c |} {res}                                                                Holy See {txt}{c |}
+     {c LT}{hline 39}{c -}{hline 34}{c RT}
+236. {c |} {res}                                            United States Virgin Islands {txt}{c |}
+237. {c |} {res}                                               Wallis and Futuna Islands {txt}{c |}
+     {c BLC}{hline 39}{c -}{hline 34}{c BRC}
+
+{com}.                 
+.                 
+.                 /*
+>                  +-------------------------------------------------------------------------+
+>      |                          OfficialName        Regionsubregioncountryorar |
+>      |-------------------------------------------------------------------------|
+>  62. |      Micronesia (Federated States of)       Micronesia (Fed. States of) |
+> 132. |          Netherlands (Kingdom of the)                       Netherlands |
+> 145. | Democratic People's Republic of Korea   Dem. People's Republic of Korea |
+> 150. |                   Kosovo (UNSCR 1244)     Kosovo (under UNSC res. 1244) |
+> 189. |                         United States          United States of America |
+>      +-------------------------------------------------------------------------+
+>                 */
+.                 restore
+{txt}
+{com}.                 
+.                 * temporarely save dataset for use for the SAB dataset
+.                 save "$data_int/pop_est_u5mr.dta", replace
+{txt}file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/data/intermediate/pop_est_u5mr.dta saved
+
+{com}.                 
+.                 * merge with ANC4 dataset
+.                 merge m:m OfficialName using "$data_int/ANC4.dta"
+{res}{txt}{p 0 7 2}
+(note: variable
+OfficialName was 
+str37, now str39 to accommodate using data's values)
+{p_end}
+
+{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}             216
+{txt}{col 9}from master{col 30}{res}             165{txt}  (_merge==1)
+{col 9}from using{col 30}{res}              51{txt}  (_merge==2)
+
+{col 5}matched{col 30}{res}              72{txt}  (_merge==3)
+{col 5}{hline 41}
+
+{com}.                 
+.                 * Investigate non matches
+.                 preserve 
+{txt}
+{com}.                         keep ISO3Code OfficialName _merge
+{txt}
+{com}.                         duplicates drop 
+
+{p 0 4}{txt}Duplicates in terms of {txt} all variables{p_end}
+
+(13 observations deleted)
+
+{com}.                         keep if _merge == 2
+{txt}(237 observations deleted)
+
+{com}.                         count
+  {res}38
+{txt}
+{com}.                         list OfficialName 
+{txt}
+     {c TLC}{hline 41}{c TRC}
+     {c |} {res}                           OfficialName {txt}{c |}
+     {c LT}{hline 41}{c RT}
+  1. {c |} {res}                                 Africa {txt}{c |}
+  2. {c |} {res}                               Americas {txt}{c |}
+  3. {c |} {res}                            Arab States {txt}{c |}
+  4. {c |} {res}                   Asia and the Pacific {txt}{c |}
+  5. {c |} {res}                              Caribbean {txt}{c |}
+     {c LT}{hline 41}{c RT}
+  6. {c |} {res}                        Central America {txt}{c |}
+  7. {c |} {res}                           Central Asia {txt}{c |}
+  8. {c |} {res}                  East Asia and Pacific {txt}{c |}
+  9. {c |} {res}               East and Southern Africa {txt}{c |}
+ 10. {c |} {res}                         Eastern Africa {txt}{c |}
+     {c LT}{hline 41}{c RT}
+ 11. {c |} {res}                           Eastern Asia {txt}{c |}
+ 12. {c |} {res}        Eastern Europe and Central Asia {txt}{c |}
+ 13. {c |} {res}                  Eastern Mediterranean {txt}{c |}
+ 14. {c |} {res}            Eastern and Southern Africa {txt}{c |}
+ 15. {c |} {res}                                 Europe {txt}{c |}
+     {c LT}{hline 41}{c RT}
+ 16. {c |} {res}                Europe and Central Asia {txt}{c |}
+ 17. {c |} {res}Landlocked developing countries (LLDCs) {txt}{c |}
+ 18. {c |} {res}        Latin America and the Caribbean {txt}{c |}
+ 19. {c |} {res}              Least developed countries {txt}{c |}
+ 20. {c |} {res}                          Middle Africa {txt}{c |}
+     {c LT}{hline 41}{c RT}
+ 21. {c |} {res}           Middle East and North Africa {txt}{c |}
+ 22. {c |} {res}                          North America {txt}{c |}
+ 23. {c |} {res}                        Northern Africa {txt}{c |}
+ 24. {c |} {res}                                Oceania {txt}{c |}
+ 25. {c |} {res}  Small Island Developing States (SIDS) {txt}{c |}
+     {c LT}{hline 41}{c RT}
+ 26. {c |} {res}                          South America {txt}{c |}
+ 27. {c |} {res}                             South Asia {txt}{c |}
+ 28. {c |} {res}                     South-Eastern Asia {txt}{c |}
+ 29. {c |} {res}                         Southeast Asia {txt}{c |}
+ 30. {c |} {res}                        Southern Africa {txt}{c |}
+     {c LT}{hline 41}{c RT}
+ 31. {c |} {res}                          Southern Asia {txt}{c |}
+ 32. {c |} {res}                     Sub-Saharan Africa {txt}{c |}
+ 33. {c |} {res}      UNICEF Programme Regions - Global {txt}{c |}
+ 34. {c |} {res}                West and Central Africa {txt}{c |}
+ 35. {c |} {res}                         Western Africa {txt}{c |}
+     {c LT}{hline 41}{c RT}
+ 36. {c |} {res}                           Western Asia {txt}{c |}
+ 37. {c |} {res}                        Western Pacific {txt}{c |}
+ 38. {c |} {res}                                  World {txt}{c |}
+     {c BLC}{hline 41}{c BRC}
+
+{com}.                         
+.                         /*
+>                 +-----------------------------------------+
+>      |                            OfficialName |
+>      |-----------------------------------------|
+>   1. |                                  Africa |
+>   2. |                                Americas |
+>   3. |                             Arab States |
+>   4. |                    Asia and the Pacific |
+>   5. |                               Caribbean |
+>      |-----------------------------------------|
+>   6. |                         Central America |
+>   7. |                            Central Asia |
+>   8. |                   East Asia and Pacific |
+>   9. |                East and Southern Africa |
+>  10. |                          Eastern Africa |
+>      |-----------------------------------------|
+>  11. |                            Eastern Asia |
+>  12. |         Eastern Europe and Central Asia |
+>  13. |                   Eastern Mediterranean |
+>  14. |             Eastern and Southern Africa |
+>  15. |                                  Europe |
+>      |-----------------------------------------|
+>  16. |                 Europe and Central Asia |
+>  17. | Landlocked developing countries (LLDCs) |
+>  18. |         Latin America and the Caribbean |
+>  19. |               Least developed countries |
+>  20. |                           Middle Africa |
+>      |-----------------------------------------|
+>  21. |            Middle East and North Africa |
+>  22. |                           North America |
+>  23. |                         Northern Africa |
+>  24. |                                 Oceania |
+>  25. |   Small Island Developing States (SIDS) |
+>      |-----------------------------------------|
+>  26. |                           South America |
+>  27. |                              South Asia |
+>  28. |                      South-Eastern Asia |
+>  29. |                          Southeast Asia |
+>  30. |                         Southern Africa |
+>      |-----------------------------------------|
+>  31. |                           Southern Asia |
+>  32. |                      Sub-Saharan Africa |
+>  33. |       UNICEF Programme Regions - Global |
+>  34. |                 West and Central Africa |
+>  35. |                          Western Africa |
+>      |-----------------------------------------|
+>  36. |                            Western Asia |
+>  37. |                         Western Pacific |
+>  38. |                                   World |
+> 
+>                         */
+.                 restore
+{txt}
+{com}.                 
+.                 * drop all non matches from using because are data for aggregate countries
+.                 drop if _merge == 2
+{txt}(51 observations deleted)
+
+{com}.                 
+.                 * drop all non matches from master because it is missing the antenatal care data
+.                 drop if _merge == 1
+{txt}(165 observations deleted)
+
+{com}.                 
+.                 drop _merge
+{txt}
+{com}.         
+.                 unique OfficialName     // 72 Countries are unique with ANC4 data
+{txt}Number of unique values of OfficialName is  {res}72
+{txt}Number of records is  {res}72
+{txt}
+{com}.                 local _N_countries_AN4 = r(unique)
+{txt}
+{com}.         
+.                 assert _N == `_N_countries_AN4'
+{txt}
+{com}.                 
+.                 keep ISO3Code OfficialName statusu5mr_encoded Year TotalPopulationasof1Januar Birthsthousands TIME_PERIOD OBS_VALUE ObservationStatus_encoded Sex_encoded Indicator_encoded
+{txt}
+{com}.                 
+.                 *save dataset for ANC4 anaysis
+.                 save "$data_fin/ANC4_data.dta", replace
+{txt}file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/data/final/ANC4_data.dta saved
+
+{com}.                 
+.                 
+.                 * create datasewt for SAB analysis
+.                 use "$data_int/pop_est_u5mr.dta", clear
+{txt}
+{com}.                 
+.                 *merge with SAB dataset
+.                 merge m:m OfficialName using "$data_int/SAB.dta"
+{res}{txt}{p 0 7 2}
+(note: variable
+OfficialName was 
+str37, now str39 to accommodate using data's values)
+{p_end}
+
+{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}             132
+{txt}{col 9}from master{col 30}{res}             107{txt}  (_merge==1)
+{col 9}from using{col 30}{res}              25{txt}  (_merge==2)
+
+{col 5}matched{col 30}{res}             130{txt}  (_merge==3)
+{col 5}{hline 41}
+
+{com}.                 
+.                 * Investigate non matches
+.                 preserve 
+{txt}
+{com}.                         keep ISO3Code OfficialName _merge
+{txt}
+{com}.                         duplicates drop 
+
+{p 0 4}{txt}Duplicates in terms of {txt} all variables{p_end}
+
+(7 observations deleted)
+
+{com}.                         keep if _merge == 2
+{txt}(237 observations deleted)
+
+{com}.                         count
+  {res}18
+{txt}
+{com}.                         list OfficialName 
+{txt}
+     {c TLC}{hline 35}{c TRC}
+     {c |} {res}                     OfficialName {txt}{c |}
+     {c LT}{hline 35}{c RT}
+  1. {c |} {res}                           Africa {txt}{c |}
+  2. {c |} {res}                         Americas {txt}{c |}
+  3. {c |} {res}                          Bermuda {txt}{c |}
+  4. {c |} {res}            East Asia and Pacific {txt}{c |}
+  5. {c |} {res}            Eastern Mediterranean {txt}{c |}
+     {c LT}{hline 35}{c RT}
+  6. {c |} {res}      Eastern and Southern Africa {txt}{c |}
+  7. {c |} {res}                           Europe {txt}{c |}
+  8. {c |} {res}          Europe and Central Asia {txt}{c |}
+  9. {c |} {res}  Latin America and the Caribbean {txt}{c |}
+ 10. {c |} {res}     Middle East and North Africa {txt}{c |}
+     {c LT}{hline 35}{c RT}
+ 11. {c |} {res}                    North America {txt}{c |}
+ 12. {c |} {res}                       South Asia {txt}{c |}
+ 13. {c |} {res}                   Southeast Asia {txt}{c |}
+ 14. {c |} {res}               Sub-Saharan Africa {txt}{c |}
+ 15. {c |} {res}UNICEF Programme Regions - Global {txt}{c |}
+     {c LT}{hline 35}{c RT}
+ 16. {c |} {res}          West and Central Africa {txt}{c |}
+ 17. {c |} {res}                  Western Pacific {txt}{c |}
+ 18. {c |} {res}                            World {txt}{c |}
+     {c BLC}{hline 35}{c BRC}
+
+{com}.                         
+.                         /*
+>            +-----------------------------------+
+>      |                      OfficialName |
+>      |-----------------------------------|
+>   1. |                            Africa |
+>   2. |                          Americas |
+>   3. |                           Bermuda |
+>   4. |             East Asia and Pacific |
+>   5. |             Eastern Mediterranean |
+>      |-----------------------------------|
+>   6. |       Eastern and Southern Africa |
+>   7. |                            Europe |
+>   8. |           Europe and Central Asia |
+>   9. |   Latin America and the Caribbean |
+>  10. |      Middle East and North Africa |
+>      |-----------------------------------|
+>  11. |                     North America |
+>  12. |                        South Asia |
+>  13. |                    Southeast Asia |
+>  14. |                Sub-Saharan Africa |
+>  15. | UNICEF Programme Regions - Global |
+>      |-----------------------------------|
+>  16. |           West and Central Africa |
+>  17. |                   Western Pacific |
+>  18. |                             World |
+>      +-----------------------------------+
+> 
+> 
+>                         */
+.                 restore
+{txt}
+{com}.                 
+.                 * drop all non matches from using because are data for aggregate countries
+.                 drop if _merge == 2
+{txt}(25 observations deleted)
+
+{com}.                 
+.                 * drop all non matches from master because it is missing the SAB data
+.                 drop if _merge == 1
+{txt}(107 observations deleted)
+
+{com}.                 
+.                 drop _merge
+{txt}
+{com}.         
+.                 unique OfficialName     // 130 Countries are unique with SAB data
+{txt}Number of unique values of OfficialName is  {res}130
+{txt}Number of records is  {res}130
+{txt}
+{com}.                 local _N_countries_SAB = r(unique)
+{txt}
+{com}.                  
+.                 *Keep only the population estimate value corresponding to the most recent coverage time for AN4 data
+.                 
+.                 assert _N == `_N_countries_SAB'
+{txt}
+{com}.                 
+.                 keep ISO3Code OfficialName statusu5mr_encoded Year TotalPopulationasof1Januar Birthsthousands TIME_PERIOD OBS_VALUE ObservationStatus_encoded Sex_encoded Indicator_encoded
+{txt}
+{com}.                 save "$data_fin/SAB_data.dta", replace
+{txt}file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/data/final/SAB_data.dta saved
+
+{com}.                 
+.         
+.         *1.3 population-weighted coverage for on-track and off-track countries for ANC4 
+. 
+.                 use "$data_fin/ANC4_data.dta", replace
+{txt}
+{com}.                 
+.                 
+.                 * achived - on track countries
+.                 gen weighted_pb =  (OBS_VALUE/100) * Birthsthousands if statusu5mr_encoded == 2 | statusu5mr_encoded == 3
+{txt}(36 missing values generated)
+
+{com}.                 egen sum_wpb = total(weighted_pb)   if statusu5mr_encoded == 2 | statusu5mr_encoded == 3 // sum of weighted projected birth
+{txt}(36 missing values generated)
+
+{com}.                 egen sum_pb = total(Birthsthousands)  if statusu5mr_encoded == 2 | statusu5mr_encoded == 3  // sum of projected birth
+{txt}(36 missing values generated)
+
+{com}.                 
+.                 * Weighted coverage for ANC4
+.                 gen wc_anc4 = (sum_wpb/sum_pb) * 100 if statusu5mr_encoded == 2 | statusu5mr_encoded == 3
+{txt}(36 missing values generated)
+
+{com}.                 
+.                 
+.                 * accellearion needed countries
+.                 replace weighted_pb =  (OBS_VALUE/100) * Birthsthousands if statusu5mr_encoded == 1
+{txt}(36 real changes made)
+
+{com}.                 egen sum_wpb_acc = total(weighted_pb)   if statusu5mr_encoded == 1 // sum of weighted projected birth
+{txt}(36 missing values generated)
+
+{com}.                 egen sum_pb_acc = total(Birthsthousands)  if statusu5mr_encoded == 1  // sum of projected birth
+{txt}(36 missing values generated)
+
+{com}.                 
+.                 * Weighted coverage for ANC4
+.                 replace wc_anc4 = (sum_wpb_acc/sum_pb_acc) * 100 if statusu5mr_encoded == 1
+{txt}(36 real changes made)
+
+{com}.                 
+.                 gen group = 1 if statusu5mr_encoded == 1
+{txt}(36 missing values generated)
+
+{com}.                 replace group  = 2 if statusu5mr_encoded == 2 | statusu5mr_encoded == 3 
+{txt}(36 real changes made)
+
+{com}.                 egen N_countrie_a = count(ISO3Code) if statusu5mr_encoded == 1
+{txt}(36 missing values generated)
+
+{com}.                 egen N_countries_b = count(ISO3Code) if statusu5mr_encoded == 2 | statusu5mr_encoded == 3 
+{txt}(36 missing values generated)
+
+{com}.                 gen N_countries_anc4 = N_countrie_a 
+{txt}(36 missing values generated)
+
+{com}.                 replace  N_countries_anc4 = N_countries_b if missing(N_countries_anc4)
+{txt}(36 real changes made)
+
+{com}.                 
+.                 
+.                 label define group ///
+>                  1 "Accelleration needed" ///
+>                  2 "On-track/Achived"
+{txt}
+{com}.                 label value group group
+{txt}
+{com}.                 
+.                 collapse  wc_anc4 N_countries_anc4, by(group)
+{txt}
+{com}. 
+.                 rename (wc_anc4 N_countries_anc4) (indice_1 N_countries_1)
+{res}{txt}
+{com}.                 tempfile wc_anc4
+{txt}
+{com}.                 save `wc_anc4'
+{txt}file C:\Users\danie\AppData\Local\Temp\ST_59e0_000006.tmp saved
+
+{com}.                 
+. 
+.         *1.4 population-weighted coverage for on-track and off-track countries for SAB 
+.         
+.                 use "$data_fin/SAB_data.dta", replace
+{txt}
+{com}.                                 
+.                 * achived - on track countries
+.                 gen weighted_pb =  (OBS_VALUE/100) * Birthsthousands if statusu5mr_encoded == 2 | statusu5mr_encoded == 3
+{txt}(33 missing values generated)
+
+{com}.                 egen sum_wpb = total(weighted_pb)   if statusu5mr_encoded == 2 | statusu5mr_encoded == 3 // sum of weighted projected birth
+{txt}(33 missing values generated)
+
+{com}.                 egen sum_pb = total(Birthsthousands)  if statusu5mr_encoded == 2 | statusu5mr_encoded == 3  // sum of projected birth
+{txt}(33 missing values generated)
+
+{com}.                 
+.                 * Weighted coverage for ANC4
+.                 gen wc_sab = (sum_wpb/sum_pb) * 100  if statusu5mr_encoded == 2 | statusu5mr_encoded == 3
+{txt}(33 missing values generated)
+
+{com}.                 
+.                 
+.                 * accellearion needed countries
+.                 replace weighted_pb =  (OBS_VALUE/100) * Birthsthousands if statusu5mr_encoded == 1
+{txt}(33 real changes made)
+
+{com}.                 egen sum_wpb_acc = total(weighted_pb)   if statusu5mr_encoded == 1 // sum of weighted projected birth
+{txt}(97 missing values generated)
+
+{com}.                 egen sum_pb_acc = total(Birthsthousands)  if statusu5mr_encoded == 1  // sum of projected birth
+{txt}(97 missing values generated)
+
+{com}.                 
+.                 * Weighted coverage for ANC4
+.                 replace wc_sab = (sum_wpb_acc/sum_pb_acc) * 100  if statusu5mr_encoded == 1
+{txt}(33 real changes made)
+
+{com}.                 
+.                 
+.                 gen group = 1 if statusu5mr_encoded == 1
+{txt}(97 missing values generated)
+
+{com}.                 replace group  = 2 if statusu5mr_encoded == 2 | statusu5mr_encoded == 3 
+{txt}(97 real changes made)
+
+{com}.                 egen N_countrie_a = count(ISO3Code) if statusu5mr_encoded == 1
+{txt}(97 missing values generated)
+
+{com}.                 egen N_countries_b = count(ISO3Code) if statusu5mr_encoded == 2 | statusu5mr_encoded == 3 
+{txt}(33 missing values generated)
+
+{com}.                 gen N_countries_sab = N_countrie_a 
+{txt}(97 missing values generated)
+
+{com}.                 replace  N_countries_sab = N_countries_b if missing(N_countries_sab)
+{txt}(97 real changes made)
+
+{com}.                 
+.                 
+.                 label define group ///
+>                  1 "Accelleration needed" ///
+>                  2 "On-track/Achived"
+{txt}
+{com}.                 label value group group
+{txt}
+{com}.                 
+.                 collapse  wc_sab N_countries_sab, by(group)
+{txt}
+{com}.         
+.                 rename (wc_sab N_countries_sab) (indice_2 N_countries_2)
+{res}{txt}
+{com}.                 
+.                 * merge 
+.                 merge 1:1 group using `wc_anc4', assert(3) nogen 
+{res}{txt}(label group already defined)
+
+{col 5}Result{col 38}# of obs.
+{col 5}{hline 41}
+{col 5}not matched{col 30}{res}               0
+{txt}{col 5}matched{col 30}{res}               2{txt}  
+{col 5}{hline 41}
+
+{com}.                 
+. 
+.         *1.5 Graph 
+.         
+.         reshape long indice_ N_countries_, i(group) j(var)
+{txt}(note: j = 1 2)
+
+Data{col 36}wide{col 43}->{col 48}long
+{hline 77}
+Number of obs.                 {res}       2   {txt}->{res}       4
+{txt}Number of variables            {res}       5   {txt}->{res}       4
+{txt}j variable (2 values)                     ->   {res}var
+{txt}xij variables:
+                      {res}indice_1 indice_2   {txt}->   {res}indice_
+            N_countries_1 N_countries_2   {txt}->   {res}N_countries_
+{txt}{hline 77}
+
+{com}.         
+.         tostring var, replace
+{txt}var was {res:byte} now {res:str1}
+
+{com}.         replace var = "ANC4" if var == "1"
+{txt}variable {bf}var{sf} was {bf}{res}str1{sf}{txt} now {bf}{res}str4{sf}
+{txt}(2 real changes made)
+
+{com}.         replace var = "SAB" if var == "2"
+{txt}(2 real changes made)
+
+{com}.         
+.         * set global graph settings
+.     global graph_opts1    ///
+>                                 ///
+>            graphregion(color(white))          ///
+>            legend(region(lc(none) fc(none)))  ///
+>            ylab(,angle(0) nogrid)             ///
+>            title(, justification(center) color(black) span pos(17)) ///
+>            subtitle(, justification(left) color(black))
+{txt}
+{com}.                    
+.         graph bar indice_ ///
+>         , ///
+>           asy ///
+>                   over(group) ///
+>                   over(var) ///
+>           bargap(20) ///
+>           nofill ///
+>           blabel(bar, format(%9.2f)) ///
+>           ${c -(}graph_opts1{c )-} ///
+>           bar(1 , lc(black) lw(thin) fi(100) color(ltblue )) ///
+>           bar(2 , lc(black) lw(thin) fi(100) color(blue)) ///
+>           legend(r(1) ///
+>           order(0 "Weighted averages:" 1 "off-track" 2 "on-track")) ///
+>           ytit("Percentage {c -(}&rarr{c )-}", ///
+>                placement(bottom) ///
+>                justification(left)) ///
+>           ylab(${c -(}pct{c )-}) ///
+>                   title("Weighted averages of ANC4 and SAB") ///
+>                   note("Note: For ANC4, both on-track and off-track weighted averages are composed by 36 countries." ///
+>                   "          For SAB, off-track countries are 33 and on-track countries are 97. " ///
+>                   ,size(2)) ///
+>                 ysize(4) ///
+>                                 xsize (10)
+{res}{p 0 4 2}
+{txt}(note:  named style
+17 not found in class
+clockdir,  default attributes used)
+{p_end}
+{p 0 4 2}
+{txt}(note:  named style
+17 not found in class
+clockdir,  default attributes used)
+{p_end}
+{res}{txt}
+{com}.         
+.         * save and export bar plot of anc4 and sab
+.         graph export "$out_graph/bar_plot_anc4_sab.png", replace        
+{txt}(file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/output/graphs/bar_plot_anc4_sab.png written in PNG format)
+
+{com}. 
+.         capture log close         
+{smcl}
+{com}{sf}{ul off}
