@@ -3,34 +3,35 @@
 
 UNICEF - P3 Statistics & Monitoring specialist Test
 
-Date: 19 August 2024
+Date: 20 August 2024
 Objective: Solution TASK 2
 
 ***********************************************/
 
+
+* log task 2
+log using "$log_dir/UNICEFP3_log_task2_august2024.smcl", replace
 ***********************************************
 *	Contents
 ***********************************************
-*(1.0) Task 2
-			*1. import data
-			*2. prepare the data 
-			*3. gen descriptive statistics
-			*4. trend analysis
-			*5. generate visualization
+*(2.0) Task 2
+			*2.1. import data
+			*2.2. prepare the data 
+			*2.3. gen descriptive statistics
+			*2.4. trend analysis
+			*2.5. generate visualization
 			
 		
-		
 ************************************************
-*(1.0) Task 2
+*(2.0) Task 2
 ************************************************
-
 	
-	*1. import data
+	*2.1. import data
 	
 		import delimited using "$data_raw/Zimbabwe_children_under5_interview.csv",   clear 
 		
 		
-	*2. prepare the data 
+	*2.2. prepare the data 
 		rename ïinterview_date interview_date
 	
 		* Convert date variables
@@ -49,22 +50,13 @@ Objective: Solution TASK 2
 
 		* Handle missing data 
 		* Check for missing data
-		misstable summarize
-		
-		return list
-		local N_miss =   r(N_eq_dot)
-		local N_ =   r(N_lt_dot)
-		
-		di `N_miss'/`N_' * 100  // = 1.0437575 -- given that the percentage of missing observatio is only 1% I prefer to drop missing observations instead of impute missing values. Another approach could be to impute missing data using the median value of the variable, using regression, or multiple imputation.
-		
-		* drop missing data
-		drop if age_months_rounded == .
+		misstable summarize // for the selected sub-sample of students between 48 and 60 months there are no missing values in any of the indicators. No further analysis needed
 		
 		* Inspect data
 		summarize
 
 	
-	*3. gen descriptive statistics
+	*2.3. gen descriptive statistics
 	
 		* Proportion of students meeting literacy and math milestones
 		gen literacy_math = (ec6 == 1) + (ec7 == 1) + (ec8 == 1)
@@ -85,65 +77,104 @@ Objective: Solution TASK 2
 		* Summary statistics by age month
 		bysort age_months_rounded: summarize literacy_math_prop physical_prop learning_prop socio_emotional_prop
 		
+		sum learning_prop
 		
-		*4. trend analysis
+		* save dataset
+		save "$data_fin/Mother_Caregiver_cu5_level_dataset.dta", replace
+		
+	*2.4. trend analysis
 		
 		* Create a new dataset with the mean proportions by age month
 		collapse (mean) literacy_math_prop physical_prop learning_prop socio_emotional_prop, by(age_months_rounded)
+		
+		* save dataset
+		save "$data_fin/Mother_Caregiver_cmau5_level_dataset.dta", replace
+		
+		* Regression for Literacy and Math
+		regress literacy_math_prop age_months_rounded
+		test _b[age_months_rounded] = 0
 
-		* Line graph for literacy and math
-		twoway (line literacy_math_prop age_months_rounded) (lfit literacy_math_prop age_months_rounded), ///
-			title("Literacy and Math Performance by Age in Months", size(3)) ///
-			ytitle("Proportion Meeting Milestones", size(2)) ///
-			xtitle("Age in Months", size(2)) ///
-			xscale(range(48 60)) ///
-			xlabel(48(2)60) ///
-			legend(off)
+		* Regression for Physical Development
+		regress physical_prop age_months_rounded
+		test _b[age_months_rounded] = 0
+
+		* Regression for Learning
+		regress learning_prop age_months_rounded
+		test _b[age_months_rounded] = 0
+
+		* Regression for Socio-emotional Development
+		regress socio_emotional_prop age_months_rounded
+		test _b[age_months_rounded] = 0
+				
+		
+		* Line graph for literacy and numeracy
+		twoway (lfitci literacy_math_prop age_months_rounded, color("222 235 247") lwidth(.05) lwidth(medium)) (lfit literacy_math_prop age_months_rounded, color(red) lwidth(.5) lpattern(dash))  (line literacy_math_prop age_months_rounded, msize(medium) color(edkblue)), ///
+			   title("Literacy and Math Performance by Age in Months", size(3)) ///
+			   ytitle("Proportion Meeting Milestones", size(2)) ///
+			   xtitle("Age in Months", size(2)) ///
+			   xscale(range(48 60)) ///
+			   xlabel(48(2)60) ///
+			   legend(off) ///
+			   graphregion(color(white)) bgcolor(white) ///
+			   note("Trend statistically different from zero at the 5% level", size(2))
+		
+		* save graph literacy and numeracy
 		graph save "$out_graph/literacy_math_prop.gph", replace	
 			
 
 		* Line graph for physical development
-		twoway (line physical_prop age_months_rounded) (lfit physical_prop age_months_rounded), ///
-			title("Physical Development by Age in Months", size(3)) ///
-			ytitle("Proportion Meeting Milestones", size(2)) ///
-			xtitle("Age in Months", size(2)) ///
-			xscale(range(48 60)) ///
-			xlabel(48(2)60) ///
-			legend(off)
+		twoway (lfitci physical_prop age_months_rounded, color("222 235 247") lwidth(.05) lwidth(medium)) (lfit physical_prop age_months_rounded, color(red) lwidth(.5) lpattern(dash)) (line physical_prop age_months_rounded, msize(medium) color(edkblue)), ///
+			   title("Physical Development by Age in Months", size(3)) ///
+			   ytitle("Proportion Meeting Milestones", size(2)) ///
+			   xtitle("Age in Months", size(2)) ///
+			   xscale(range(48 60)) ///
+			   xlabel(48(2)60) ///
+			   legend(off) ///
+			   graphregion(color(white)) bgcolor(white) ///
+			   note("Trend statistically different from zero at the 5% level", size(2))
 		
+		* save graph physical development
 		graph save "$out_graph/physical_prop.gph", replace	
 		
 		
 		* Line graph for learning
-		twoway (line learning_prop age_months_rounded) (lfit learning_prop age_months_rounded), ///
-			title("Learning Performance by Age in Months",  size(3)) ///
-			ytitle("Proportion Meeting Milestones", size(2)) ///
-			xtitle("Age in Months", size(2)) ///
-			xscale(range(48 60)) ///
-			xlabel(48(2)60) ///
-			legend(off)
+		twoway (lfitci learning_prop age_months_rounded, color("222 235 247") lwidth(.05) lwidth(medium)) (lfit learning_prop age_months_rounded, color(red) lwidth(.5) lpattern(dash)) (line learning_prop age_months_rounded, msize(medium) color(edkblue)), ///
+			   title("Learning Performance by Age in Months", size(3)) ///
+			   ytitle("Proportion Meeting Milestones", size(2)) ///
+			   xtitle("Age in Months", size(2)) ///
+			   xscale(range(48 60)) ///
+			   xlabel(48(2)60) ///
+			   legend(off) ///
+			   graphregion(color(white)) bgcolor(white) ///
+			   note("Trend NOT statistically different from zero", size(2))
 		
+		* save graph learning achivements
 		graph save "$out_graph/learning_prop.gph", replace	
 		
 		
 		* Line graph for socio-emotional development
-		twoway (line socio_emotional_prop age_months_rounded)  (lfit socio_emotional_prop age_months_rounded), ///
-			title("Socio-emotional Development by Age in Months", size(3)) ///
-			ytitle("Proportion Meeting Milestones", size(2)) ///
-			xtitle("Age in Months", size(2)) ///
-			xscale(range(48 60)) ///
-			xlabel(48(2)60) ///
-			legend(off)
-
+		twoway (lfitci socio_emotional_prop age_months_rounded, color("222 235 247") lwidth(.05) lwidth(medium)) (lfit socio_emotional_prop age_months_rounded, color(red) lwidth(.5) lpattern(dash)) (line socio_emotional_prop age_months_rounded, msize(medium) color(edkblue)), ///
+			   title("Socio-emotional Development by Age in Months", size(3)) ///
+			   ytitle("Proportion Meeting Milestones", size(2)) ///
+			   xtitle("Age in Months", size(2)) ///
+			   xscale(range(48 60)) ///
+			   xlabel(48(2)60) ///
+			   legend(off) ///
+			   graphregion(color(white)) bgcolor(white) ///
+			   note("Trend statistically different from zero at the 10% level", size(2))
+		
+		* save graph learning socio-emotional development
 		graph save "$out_graph/socio_emotional_prop.gph", replace		
 
 
-	*5. generate visualization
+	*2.5. generate visualization
 	
 		* Combine the graphs into panels
 		graph combine "$out_graph/literacy_math_prop.gph" "$out_graph/physical_prop.gph" "$out_graph/learning_prop.gph" "$out_graph/socio_emotional_prop.gph" , ///
 			title("Educational Performance Trends by Age in Months") ///
 			subtitle("Zimbabwe MICS6 Survey Data (2019)") ///
 			
-
-		graph export "$out_graph/panel.png", replace		
+		* save and export combined graph of literacy and numeracy, physical development, socio-emotional development, and socio-emotional development
+		graph export "$out_graph/panel.png", replace
+		
+		capture log close

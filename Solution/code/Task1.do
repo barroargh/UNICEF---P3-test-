@@ -1,4 +1,5 @@
-
+* log task 1
+log using "$log_dir/UNICEFP3_log_task1_august2024.smcl", replace
 /***********************************************
 
 UNICEF - P3 Statistics & Monitoring specialist Test
@@ -11,7 +12,7 @@ Objective: Solution TASK 1
 ***********************************************
 *	Contents
 ***********************************************
-*(1.0) Task 1
+		*(1.0) Task 1
 			*1.1 import data
 			*1.2 merge datasets
 			*1.3 population-weighted coverage for on-track and off-track countries for ANC4 
@@ -61,7 +62,7 @@ Objective: Solution TASK 1
 		keep if max_time_period == TIME_PERIOD 
 
 		
-		
+		* keep relevant variables
 		keep   OfficialName Indicator_encoded TIME_PERIOD OBS_VALUE  ObservationStatus Sex
 		label define indicator_2 ///
 			 1 "ANC4" ///
@@ -79,51 +80,6 @@ Objective: Solution TASK 1
 			keep if Indicator_encoded == 2
 			save "$data_int/SAB.dta", replace
 		restore
-		
-		/*
-		* import United Nations World Population Prospects population estimates
-		import excel using "$data_raw/WPP2022_GEN_F01_DEMOGRAPHIC_INDICATORS_COMPACT_REV1.xlsx", sheet("Estimates") cellrange("A17:BM20613") clear firstrow
-	
-		desc
-		
-		* drop variables with all missing observations (NO VARIABLES DROPPED)
-		 foreach var of varlist _all {
-		   capture assert mi(`var')
-			 if !_rc {
-				di "`var'"
-				drop `var'
-			 }
-		}
-		
-		* rename according to dataset name
-		rename (BJ BK) (MaleMortalitybetweenAge15and60 FemaleMortalitybetweenAge15and60)
-		
-		br TotalPopulationasof1Januar if TotalPopulationasof1Januar == "..."
-		drop if Regionsubregioncountryorar == "Sustainable Development Goal (SDG) regions" | Regionsubregioncountryorar == "UN development groups" | Regionsubregioncountryorar == "World Bank income groups" | Regionsubregioncountryorar == "Geographic regions" 
-		
-		foreach var of varlist TotalPopulationasof1Januar-NetMigrationRateper1000po { 
-    replace `var' = "" if `var' == "..."
-}
-
-		destring TotalPopulationasof1Januar-NetMigrationRateper1000po, replace  
-		
-		encode Type , gen(type_encoded)
-		drop Type
-		
-		
-		sort Regionsubregioncountryorar
-		
-		*drop aggregate estimates 
-		drop if ISO3Alphacode == ""
-		unique ISO3Alphacode // 237 country in the record
-		rename ISO3Alphacode ISO3Code
-		
-		replace ISO3Code = "RKS" if ISO3Code == "XKX" // replaced ISO3Code for Kosovo because ISO3Alphacode is different than under five mortality dataset 
-		
-		* save intermediate dataset 
-		save "$data_int/pop_estimate.dta", replace
-
-		*/
 		
 		
 		* import United Nations World Population Prospects population estimates
@@ -143,62 +99,52 @@ Objective: Solution TASK 1
 		* rename according to dataset name
 		rename (BJ BK) (MaleMortalitybetweenAge15and60 FemaleMortalitybetweenAge15and60)
 		
-		br TotalPopulationasof1Januar if TotalPopulationasof1Januar == "..."
+		* drop line for aggregate region
 		drop if Regionsubregioncountryorar == "Sustainable Development Goal (SDG) regions" | Regionsubregioncountryorar == "UN development groups" | Regionsubregioncountryorar == "World Bank income groups" | Regionsubregioncountryorar == "Geographic regions" 
 		
+		* replace string value with missing for all numeric variables
 		foreach var of varlist TotalPopulationasof1Januar-NetMigrationRateper1000po { 
     replace `var' = "" if `var' == "..."
 }
-
+		* destring all pulation projections
 		destring TotalPopulationasof1Januar-NetMigrationRateper1000po, replace  
 		
 		encode Type , gen(type_encoded)
 		drop Type
 		
-		
 		sort Regionsubregioncountryorar
 		
 		*drop aggregate estimates 
 		drop if ISO3Alphacode == ""
-		unique ISO3Alphacode // 215 country in the record
+		unique ISO3Alphacode // 237 country in the record
 		rename ISO3Alphacode ISO3Code
 		
 		replace ISO3Code = "RKS" if ISO3Code == "XKX" // replaced ISO3Code for Kosovo because ISO3Alphacode is different than under five mortality dataset 
-		keep if Year == 2022
+		keep if Year == 2022 // keep only year 2022 as per the task instructions
 		count 
 		assert _N == 237
 		
 		* save intermediate dataset 
 		save "$data_int/pop_projection.dta", replace
+
 		
-		/*
-		* add year 2022 to the populatin_estimate dataset for later use in the code  
-		use "$data_int/pop_estimate.dta",clear 
-		append using "$data_int/pop_projection.dta"
-		* save intermediate dataset 
-		save "$data_int/pop_data.dta", replace
-		
-		
-		use "$data_int/pop_data.dta", clear
-		bys ISO3Code: gen pb_estimate_2021 = Birthsthousands if Year == 2021
-		bys ISO3Code: egen pb_estimate_2021_e = max(pb_estimate_2021) // 73 missing value generated because Holy See as no data for Birthsthousands for any year
-		assert missing(Birthsthousands) if ISO3Code == "VAT"
-		replace Birthsthousands = pb_estimate_2021_e if missing(Birthsthousands)
-		*/
 
 		* import Under-five mortality on-track and off-track classifications
 		import excel using "$data_raw/On-track and off-track countries.xlsx", sheet("Sheet1") clear firstrow
+		
+		desc
 		
 		encode StatusU5MR, gen (statusu5mr_encoded) 
 		drop StatusU5MR
 		
 		unique ISO3Code 
 		local _N = r(unique)
+		
 		* save intermediate dataset 
 		save "$data_int/u5mr.dta", replace
-	*******************	
+	
+	
 	*1.2 merge datasets
-	*******************
 	
 		use "$data_int/u5mr.dta", clear // use the list of countries with on-track and off-track data as master list
 
@@ -215,7 +161,7 @@ Objective: Solution TASK 1
 		* check that offical name of the countries in the two dataset matches 
 		gen check_off_name = OfficialName == Regionsubregioncountryorar
 		
-		* Identify countries with Offical Name missmatch
+		* Identify countries with Offical Name missmatch - decide to use OfficalName for the merge with ANC4 and SAB because name of the country matches wth OfficalName variable
 		preserve	
 			keep OfficialName Regionsubregioncountryorar check_off_name
 			duplicates drop 
@@ -238,10 +184,10 @@ Objective: Solution TASK 1
 		* temporarely save dataset for use for the SAB dataset
 		save "$data_int/pop_est_u5mr.dta", replace
 		
-		
-		*merge with ANC4 dataset
+		* merge with ANC4 dataset
 		merge m:m OfficialName using "$data_int/ANC4.dta"
 		
+		* Investigate non matches
 		preserve 
 			keep ISO3Code OfficialName _merge
 			duplicates drop 
@@ -312,22 +258,22 @@ Objective: Solution TASK 1
 	
 		unique OfficialName	// 72 Countries are unique with ANC4 data
 		local _N_countries_AN4 = r(unique)
-		 
 	
 		assert _N == `_N_countries_AN4'
 		
 		keep ISO3Code OfficialName statusu5mr_encoded Year TotalPopulationasof1Januar Birthsthousands TIME_PERIOD OBS_VALUE ObservationStatus_encoded Sex_encoded Indicator_encoded
+		
+		*save dataset for ANC4 anaysis
 		save "$data_fin/ANC4_data.dta", replace
 		
 		
 		* create datasewt for SAB analysis
 		use "$data_int/pop_est_u5mr.dta", clear
 		
-	
-		
 		*merge with SAB dataset
 		merge m:m OfficialName using "$data_int/SAB.dta"
 		
+		* Investigate non matches
 		preserve 
 			keep ISO3Code OfficialName _merge
 			duplicates drop 
@@ -369,7 +315,7 @@ Objective: Solution TASK 1
 		* drop all non matches from using because are data for aggregate countries
 		drop if _merge == 2
 		
-		* drop all non matches from master because it is missing the antenatal care data
+		* drop all non matches from master because it is missing the SAB data
 		drop if _merge == 1
 		
 		drop _merge
@@ -377,8 +323,6 @@ Objective: Solution TASK 1
 		unique OfficialName	// 130 Countries are unique with SAB data
 		local _N_countries_SAB = r(unique)
 		 
-		
-		
 		*Keep only the population estimate value corresponding to the most recent coverage time for AN4 data
 		
 		assert _N == `_N_countries_SAB'
@@ -386,11 +330,9 @@ Objective: Solution TASK 1
 		keep ISO3Code OfficialName statusu5mr_encoded Year TotalPopulationasof1Januar Birthsthousands TIME_PERIOD OBS_VALUE ObservationStatus_encoded Sex_encoded Indicator_encoded
 		save "$data_fin/SAB_data.dta", replace
 		
-		
-		
-	*****************
+	
 	*1.3 population-weighted coverage for on-track and off-track countries for ANC4 
-	*****************
+
 		use "$data_fin/ANC4_data.dta", replace
 		
 		
@@ -430,9 +372,9 @@ Objective: Solution TASK 1
 		tempfile wc_anc4
 		save `wc_anc4'
 		
-	*****************
+
 	*1.4 population-weighted coverage for on-track and off-track countries for SAB 
-	*****************
+	
 		use "$data_fin/SAB_data.dta", replace
 				
 		* achived - on track countries
@@ -470,20 +412,21 @@ Objective: Solution TASK 1
 	
 		rename (wc_sab N_countries_sab) (indice_2 N_countries_2)
 		
-		
+		* merge 
 		merge 1:1 group using `wc_anc4', assert(3) nogen 
 		
-	*****************
+
 	*1.5 Graph 
-	*****************
+	
 	reshape long indice_ N_countries_, i(group) j(var)
 	
 	tostring var, replace
 	replace var = "ANC4" if var == "1"
 	replace var = "SAB" if var == "2"
 	
+	* set global graph settings
     global graph_opts1    ///
-           bgcolor(white) ///
+				///
            graphregion(color(white))          ///
            legend(region(lc(none) fc(none)))  ///
            ylab(,angle(0) nogrid)             ///
@@ -513,7 +456,8 @@ Objective: Solution TASK 1
 		  ,size(2)) ///
                 ysize(4) ///
 				xsize (10)
-		  
+	
+	* save and export bar plot of anc4 and sab
 	graph export "$out_graph/bar_plot_anc4_sab.png", replace	
 
-		  
+	capture log close	  

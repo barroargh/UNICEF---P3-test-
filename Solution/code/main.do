@@ -3,7 +3,7 @@
 
 UNICEF - P3 Statistics & Monitoring specialist Test
 
-Date: 24 April 2023
+Date: 19 August 2023
 Objective: Set up main do file
 
 ***********************************************/
@@ -32,7 +32,7 @@ Objective: Set up main do file
 		global data_fin   "$data_dir/final"
 		global out_dir    "$home_dir/output"
 		global out_graph  "$out_dir/graphs"	
-		global code_dir		  "$home_dir/code"
+		global code_dir	  "$home_dir/code"
 		global log_dir    "$out_dir/logs"
 		
 		
@@ -46,18 +46,21 @@ Objective: Set up main do file
 		version 16
 		
 		capture log close
-		*log using "$log_dir/UNICEFP3_test_august2024.smcl", replace
-
 		
+		* local to run TASK 1 and 2 do files
 		local task1 		1
+		local task2			1
 ************************************************
 *(0.3) Run do-file TASK 1
 ************************************************
 	
-	* corrections
+	* Task 1
 	if (`task1' == 1) {
 		do "$code_dir/Task1.do"
 	} 
  
-	
-	
+	* Task 2
+	if (`task2' == 1) {
+		do "$code_dir/Task2.do"
+	} 
+ 

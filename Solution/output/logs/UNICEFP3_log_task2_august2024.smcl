@@ -1,0 +1,465 @@
+{smcl}
+{com}{sf}{ul off}{txt}{.-}
+      name:  {res}<unnamed>
+       {txt}log:  {res}C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/output/logs/UNICEFP3_log_task2_august2024.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res}20 Aug 2024, 15:29:08
+{txt}
+{com}. ***********************************************
+. *       Contents
+. ***********************************************
+. *(2.0) Task 2
+.                         *2.1. import data
+.                         *2.2. prepare the data 
+.                         *2.3. gen descriptive statistics
+.                         *2.4. trend analysis
+.                         *2.5. generate visualization
+.                         
+.                 
+. ************************************************
+. *(2.0) Task 2
+. ************************************************
+.         
+.         *2.1. import data
+.         
+.                 import delimited using "$data_raw/Zimbabwe_children_under5_interview.csv",   clear 
+{res}{text}(13 vars, 2,517 obs)
+
+{com}.                 
+.                 
+.         *2.2. prepare the data 
+.                 rename ïinterview_date interview_date
+{res}{txt}
+{com}.         
+.                 * Convert date variables
+.                 gen interview_date_ = date(interview_date, "YMD")
+{txt}
+{com}.                 gen child_birthday_ = date(child_birthday, "YMD")
+{txt}(26 missing values generated)
+
+{com}. 
+.                 format interview_date_ child_birthday_ %td
+{txt}
+{com}. 
+.                 * Create age in months
+.                 gen age_months = (interview_date_ - child_birthday_)/30 // assuming 30 days per in each month
+{txt}(26 missing values generated)
+
+{com}. 
+.                 keep if age_months >= 12*4 & age_months <= 12*5 // keep only observation for students between 4 and 5 years old included
+{txt}(1,265 observations deleted)
+
+{com}.                 
+.                 * round age_month to the nearest whole number
+.                 gen age_months_rounded = round(age_months)
+{txt}
+{com}. 
+.                 * Handle missing data 
+.                 * Check for missing data
+.                 misstable summarize // for the selected sub-sample of students between 48 and 60 months there are no missing values in any of the indicators. No further analysis needed
+{txt}(variables nonmissing or string)
+
+{com}.                 
+.                 * Inspect data
+.                 summarize
+
+{txt}    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+interview_~e {c |}{res}          0
+{txt}child_age_~s {c |}{res}      1,252    3.948083     .221948          3          4
+{txt}child_birt~y {c |}{res}          0
+{txt}{space 9}ec6 {c |}{res}      1,252    1.870607    .4241306          1          8
+{txt}{space 9}ec7 {c |}{res}      1,252    1.868211    .3383965          1          2
+{txt}{hline 13}{c +}{hline 57}
+{space 9}ec8 {c |}{res}      1,252    1.766773    .4610295          1          8
+{txt}{space 9}ec9 {c |}{res}      1,252    1.159744    .8594475          1          8
+{txt}{space 8}ec10 {c |}{res}      1,252    1.618211    .4860194          1          2
+{txt}{space 8}ec11 {c |}{res}      1,252    1.114217     .318202          1          2
+{txt}{space 8}ec12 {c |}{res}      1,252    1.234026    .4235574          1          2
+{txt}{hline 13}{c +}{hline 57}
+{space 8}ec13 {c |}{res}      1,252    1.035942    .1862212          1          2
+{txt}{space 8}ec14 {c |}{res}      1,252    1.530351    .5318374          1          8
+{txt}{space 8}ec15 {c |}{res}      1,252    1.635783    .4814023          1          2
+{txt}interview_~_ {c |}{res}      1,252    21595.13    25.09166      21539      21653
+{txt}child_birt~_ {c |}{res}      1,252    19972.78    107.5286      19763      20193
+{txt}{hline 13}{c +}{hline 57}
+{space 2}age_months {c |}{res}      1,252    54.07825    3.477016         48         60
+{txt}age_months~d {c |}{res}      1,252    54.10783    3.502933         48         60
+{txt}
+{com}. 
+.         
+.         *2.3. gen descriptive statistics
+.         
+.                 * Proportion of students meeting literacy and math milestones
+.                 gen literacy_math = (ec6 == 1) + (ec7 == 1) + (ec8 == 1)
+{txt}
+{com}.                 gen literacy_math_prop = literacy_math / 3
+{txt}
+{com}. 
+.                 * Proportion of students meeting physical milestones
+.                 gen physical = (ec9 == 1) + (ec10 == 1)
+{txt}
+{com}.                 gen physical_prop = physical / 2
+{txt}
+{com}. 
+.                 * Proportion of students meeting learning milestones
+.                 gen learning = (ec11 == 1) + (ec12 == 1)
+{txt}
+{com}.                 gen learning_prop = learning / 2
+{txt}
+{com}. 
+.                 * Proportion of students meeting socio-emotional milestones
+.                 gen socio_emotional = (ec13 == 1) + (ec14 == 1) + (ec15 == 1)
+{txt}
+{com}.                 gen socio_emotional_prop = socio_emotional / 3
+{txt}
+{com}. 
+.                 * Summary statistics by age month
+.                 bysort age_months_rounded: summarize literacy_math_prop physical_prop learning_prop socio_emotional_prop
+
+{txt}{hline}
+-> age_months_rounded = 48
+
+    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+literacy_m~p {c |}{res}         45    .1111111    .2247333          0          1
+{txt}physical_p~p {c |}{res}         45    .6333333    .2696799          0          1
+{txt}learning_p~p {c |}{res}         45    .7888889    .3452418          0          1
+{txt}socio_emot~p {c |}{res}         45     .637037    .2443526   .3333333          1
+
+{txt}{hline}
+-> age_months_rounded = 49
+
+    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+literacy_m~p {c |}{res}        112    .1369048    .2432413          0          1
+{txt}physical_p~p {c |}{res}        112    .6160714    .2846061          0          1
+{txt}learning_p~p {c |}{res}        112    .8035714    .3379665          0          1
+{txt}socio_emot~p {c |}{res}        112    .6130952    .2667927          0          1
+
+{txt}{hline}
+-> age_months_rounded = 50
+
+    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+literacy_m~p {c |}{res}        103    .1391586    .2661935          0          1
+{txt}physical_p~p {c |}{res}        103    .6456311    .2387782          0          1
+{txt}learning_p~p {c |}{res}        103    .8398058    .2730869          0          1
+{txt}socio_emot~p {c |}{res}        103    .6019418    .2241335          0          1
+
+{txt}{hline}
+-> age_months_rounded = 51
+
+    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+literacy_m~p {c |}{res}         98    .1054422    .2325068          0          1
+{txt}physical_p~p {c |}{res}         98    .6122449    .2736788          0          1
+{txt}learning_p~p {c |}{res}         98    .8877551    .2640936          0          1
+{txt}socio_emot~p {c |}{res}         98    .6360544    .2536638   .3333333          1
+
+{txt}{hline}
+-> age_months_rounded = 52
+
+    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+literacy_m~p {c |}{res}         91    .1538462    .2643776          0          1
+{txt}physical_p~p {c |}{res}         91    .6978022    .2568951          0          1
+{txt}learning_p~p {c |}{res}         91    .8076923    .3141941          0          1
+{txt}socio_emot~p {c |}{res}         91    .6263736    .2525679   .3333333          1
+
+{txt}{hline}
+-> age_months_rounded = 53
+
+    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+literacy_m~p {c |}{res}         87    .1724138    .2869337          0          1
+{txt}physical_p~p {c |}{res}         87    .6494253    .2425032          0          1
+{txt}learning_p~p {c |}{res}         87    .7873563    .3109642          0          1
+{txt}socio_emot~p {c |}{res}         87    .5900383    .2421968   .3333333          1
+
+{txt}{hline}
+-> age_months_rounded = 54
+
+    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+literacy_m~p {c |}{res}        119    .1484594    .2628881          0          1
+{txt}physical_p~p {c |}{res}        119    .6764706     .265121          0          1
+{txt}learning_p~p {c |}{res}        119    .8781513    .2601042          0          1
+{txt}socio_emot~p {c |}{res}        119    .5770308    .2404385          0          1
+
+{txt}{hline}
+-> age_months_rounded = 55
+
+    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+literacy_m~p {c |}{res}        131    .2111959    .3127111          0          1
+{txt}physical_p~p {c |}{res}        131    .6374046    .2845606          0          1
+{txt}learning_p~p {c |}{res}        131    .7824427    .3168307          0          1
+{txt}socio_emot~p {c |}{res}        131     .562341    .2229713   .3333333          1
+
+{txt}{hline}
+-> age_months_rounded = 56
+
+    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+literacy_m~p {c |}{res}         95    .1719298    .2566522          0          1
+{txt}physical_p~p {c |}{res}         95    .6578947    .2656101          0          1
+{txt}learning_p~p {c |}{res}         95    .8421053    .2656101          0          1
+{txt}socio_emot~p {c |}{res}         95    .6210526    .2460589          0          1
+
+{txt}{hline}
+-> age_months_rounded = 57
+
+    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+literacy_m~p {c |}{res}         93    .2329749    .3214736          0          1
+{txt}physical_p~p {c |}{res}         93    .6612903    .2674486          0          1
+{txt}learning_p~p {c |}{res}         93    .8225806    .3183275          0          1
+{txt}socio_emot~p {c |}{res}         93    .6236559    .2419017   .3333333          1
+
+{txt}{hline}
+-> age_months_rounded = 58
+
+    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+literacy_m~p {c |}{res}        108    .1820988    .3001705          0          1
+{txt}physical_p~p {c |}{res}        108    .6759259    .2675155          0          1
+{txt}learning_p~p {c |}{res}        108    .8472222    .2856239          0          1
+{txt}socio_emot~p {c |}{res}        108    .5648148    .2473466          0          1
+
+{txt}{hline}
+-> age_months_rounded = 59
+
+    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+literacy_m~p {c |}{res}        112    .2053571    .3203025          0          1
+{txt}physical_p~p {c |}{res}        112    .6741071    .2574111          0          1
+{txt}learning_p~p {c |}{res}        112    .8035714     .317345          0          1
+{txt}socio_emot~p {c |}{res}        112    .6101191    .2362893   .3333333          1
+
+{txt}{hline}
+-> age_months_rounded = 60
+
+    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+literacy_m~p {c |}{res}         58    .2126437    .3165252          0          1
+{txt}physical_p~p {c |}{res}         58    .6637931     .254571          0          1
+{txt}learning_p~p {c |}{res}         58    .8275862    .2894599          0          1
+{txt}socio_emot~p {c |}{res}         58    .5804598    .2463009          0          1
+
+{txt}
+{com}.                 
+.                 sum learning_prop
+
+{txt}    Variable {c |}        Obs        Mean    Std. Dev.       Min        Max
+{hline 13}{c +}{hline 57}
+learning_p~p {c |}{res}      1,252    .8258786    .2999354          0          1
+{txt}
+{com}.                 
+.                 * save dataset
+.                 save "$data_fin/Mother_Caregiver_cu5_level_dataset.dta", replace
+{txt}(note: file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/data/final/Mother_Caregiver_cu5_level_dataset.dta not found)
+file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/data/final/Mother_Caregiver_cu5_level_dataset.dta saved
+
+{com}.                 
+.         *2.4. trend analysis
+.                 
+.                 * Create a new dataset with the mean proportions by age month
+.                 collapse (mean) literacy_math_prop physical_prop learning_prop socio_emotional_prop, by(age_months_rounded)
+{txt}
+{com}.                 
+.                 * save dataset
+.                 save "$data_fin/Mother_Caregiver_cmau5_level_dataset.dta", replace
+{txt}(note: file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/data/final/Mother_Caregiver_cmau5_level_dataset.dta not found)
+file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/data/final/Mother_Caregiver_cmau5_level_dataset.dta saved
+
+{com}.                 
+.                 * Regression for Literacy and Math
+.                 regress literacy_math_prop age_months_rounded
+
+{txt}      Source {c |}       SS           df       MS      Number of obs   ={res}        13
+{txt}{hline 13}{c +}{hline 34}   F(1, 11)        = {res}    27.41
+{txt}       Model {c |} {res} .013729784         1  .013729784   {txt}Prob > F        ={res}    0.0003
+{txt}    Residual {c |} {res} .005510878        11  .000500989   {txt}R-squared       ={res}    0.7136
+{txt}{hline 13}{c +}{hline 34}   Adj R-squared   ={res}    0.6875
+{txt}       Total {c |} {res} .019240662        12  .001603388   {txt}Root MSE        =   {res} .02238
+
+{txt}{hline 19}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}literacy_math_prop{col 20}{c |}      Coef.{col 32}   Std. Err.{col 44}      t{col 52}   P>|t|{col 60}     [95% Con{col 73}f. Interval]
+{hline 19}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+age_months_rounded {c |}{col 20}{res}{space 2} .0086855{col 32}{space 2} .0016591{col 43}{space 1}    5.24{col 52}{space 3}0.000{col 60}{space 4} .0050338{col 73}{space 3} .0123372
+{txt}{space 13}_cons {c |}{col 20}{res}{space 2}-.3010541{col 32}{space 2} .0898074{col 43}{space 1}   -3.35{col 52}{space 3}0.006{col 60}{space 4}-.4987189{col 73}{space 3}-.1033893
+{txt}{hline 19}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}{txt}
+{com}.                 test _b[age_months_rounded] = 0
+
+{p 0 7}{space 1}{text:( 1)}{space 1} {res}age_months_rounded = 0{p_end}
+
+{txt}       F(  1,    11) ={res}   27.41
+{txt}{col 13}Prob > F ={res}    0.0003
+{txt}
+{com}. 
+.                 * Regression for Physical Development
+.                 regress physical_prop age_months_rounded
+
+{txt}      Source {c |}       SS           df       MS      Number of obs   ={res}        13
+{txt}{hline 13}{c +}{hline 34}   F(1, 11)        = {res}     4.97
+{txt}       Model {c |} {res} .002317268         1  .002317268   {txt}Prob > F        ={res}    0.0476
+{txt}    Residual {c |} {res} .005131081        11  .000466462   {txt}R-squared       ={res}    0.3111
+{txt}{hline 13}{c +}{hline 34}   Adj R-squared   ={res}    0.2485
+{txt}       Total {c |} {res} .007448349        12  .000620696   {txt}Root MSE        =   {res}  .0216
+
+{txt}{hline 19}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}     physical_prop{col 20}{c |}      Coef.{col 32}   Std. Err.{col 44}      t{col 52}   P>|t|{col 60}     [95% Con{col 73}f. Interval]
+{hline 19}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+age_months_rounded {c |}{col 20}{res}{space 2} .0035682{col 32}{space 2} .0016009{col 43}{space 1}    2.23{col 52}{space 3}0.048{col 60}{space 4} .0000446{col 73}{space 3} .0070919
+{txt}{space 13}_cons {c |}{col 20}{res}{space 2} .4612692{col 32}{space 2} .0866575{col 43}{space 1}    5.32{col 52}{space 3}0.000{col 60}{space 4} .2705373{col 73}{space 3} .6520011
+{txt}{hline 19}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}{txt}
+{com}.                 test _b[age_months_rounded] = 0
+
+{p 0 7}{space 1}{text:( 1)}{space 1} {res}age_months_rounded = 0{p_end}
+
+{txt}       F(  1,    11) ={res}    4.97
+{txt}{col 13}Prob > F ={res}    0.0476
+{txt}
+{com}. 
+.                 * Regression for Learning
+.                 regress learning_prop age_months_rounded
+
+{txt}      Source {c |}       SS           df       MS      Number of obs   ={res}        13
+{txt}{hline 13}{c +}{hline 34}   F(1, 11)        = {res}     0.08
+{txt}       Model {c |} {res} .000093198         1  .000093198   {txt}Prob > F        ={res}    0.7875
+{txt}    Residual {c |} {res} .013435311        11  .001221392   {txt}R-squared       ={res}    0.0069
+{txt}{hline 13}{c +}{hline 34}   Adj R-squared   ={res}   -0.0834
+{txt}       Total {c |} {res}  .01352851        12  .001127376   {txt}Root MSE        =   {res} .03495
+
+{txt}{hline 19}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}     learning_prop{col 20}{c |}      Coef.{col 32}   Std. Err.{col 44}      t{col 52}   P>|t|{col 60}     [95% Con{col 73}f. Interval]
+{hline 19}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+age_months_rounded {c |}{col 20}{res}{space 2} .0007156{col 32}{space 2} .0025905{col 43}{space 1}    0.28{col 52}{space 3}0.787{col 60}{space 4}-.0049862{col 73}{space 3} .0064174
+{txt}{space 13}_cons {c |}{col 20}{res}{space 2} .7858754{col 32}{space 2} .1402251{col 43}{space 1}    5.60{col 52}{space 3}0.000{col 60}{space 4} .4772421{col 73}{space 3} 1.094509
+{txt}{hline 19}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}{txt}
+{com}.                 test _b[age_months_rounded] = 0
+
+{p 0 7}{space 1}{text:( 1)}{space 1} {res}age_months_rounded = 0{p_end}
+
+{txt}       F(  1,    11) ={res}    0.08
+{txt}{col 13}Prob > F ={res}    0.7875
+{txt}
+{com}. 
+.                 * Regression for Socio-emotional Development
+.                 regress socio_emotional_prop age_months_rounded
+
+{txt}      Source {c |}       SS           df       MS      Number of obs   ={res}        13
+{txt}{hline 13}{c +}{hline 34}   F(1, 11)        = {res}     3.20
+{txt}       Model {c |} {res} .001838087         1  .001838087   {txt}Prob > F        ={res}    0.1013
+{txt}    Residual {c |} {res} .006325432        11  .000575039   {txt}R-squared       ={res}    0.2252
+{txt}{hline 13}{c +}{hline 34}   Adj R-squared   ={res}    0.1547
+{txt}       Total {c |} {res} .008163519        12  .000680293   {txt}Root MSE        =   {res} .02398
+
+{txt}{hline 19}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}socio_emotional_~p{col 20}{c |}      Coef.{col 32}   Std. Err.{col 44}      t{col 52}   P>|t|{col 60}     [95% Con{col 73}f. Interval]
+{hline 19}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+age_months_rounded {c |}{col 20}{res}{space 2} -.003178{col 32}{space 2} .0017775{col 43}{space 1}   -1.79{col 52}{space 3}0.101{col 60}{space 4}-.0070902{col 73}{space 3} .0007343
+{txt}{space 13}_cons {c |}{col 20}{res}{space 2} .7749951{col 32}{space 2} .0962159{col 43}{space 1}    8.05{col 52}{space 3}0.000{col 60}{space 4} .5632254{col 73}{space 3} .9867649
+{txt}{hline 19}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}{txt}
+{com}.                 test _b[age_months_rounded] = 0
+
+{p 0 7}{space 1}{text:( 1)}{space 1} {res}age_months_rounded = 0{p_end}
+
+{txt}       F(  1,    11) ={res}    3.20
+{txt}{col 13}Prob > F ={res}    0.1013
+{txt}
+{com}.                                 
+.                 
+.                 * Line graph for literacy and numeracy
+.                 twoway (lfitci literacy_math_prop age_months_rounded, color("222 235 247") lwidth(.05) lwidth(medium)) (lfit literacy_math_prop age_months_rounded, color(red) lwidth(.5) lpattern(dash))  (line literacy_math_prop age_months_rounded, msize(medium) color(edkblue)), ///
+>                            title("Literacy and Math Performance by Age in Months", size(3)) ///
+>                            ytitle("Proportion Meeting Milestones", size(2)) ///
+>                            xtitle("Age in Months", size(2)) ///
+>                            xscale(range(48 60)) ///
+>                            xlabel(48(2)60) ///
+>                            legend(off) ///
+>                            graphregion(color(white)) bgcolor(white) ///
+>                            note("Trend statistically different from zero at the 5% level", size(2))
+{res}{txt}
+{com}.                 
+.                 * save graph literacy and numeracy
+.                 graph save "$out_graph/literacy_math_prop.gph", replace 
+{res}{txt}(file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/output/graphs/literacy_math_prop.gph saved)
+
+{com}.                         
+. 
+.                 * Line graph for physical development
+.                 twoway (lfitci physical_prop age_months_rounded, color("222 235 247") lwidth(.05) lwidth(medium)) (lfit physical_prop age_months_rounded, color(red) lwidth(.5) lpattern(dash)) (line physical_prop age_months_rounded, msize(medium) color(edkblue)), ///
+>                            title("Physical Development by Age in Months", size(3)) ///
+>                            ytitle("Proportion Meeting Milestones", size(2)) ///
+>                            xtitle("Age in Months", size(2)) ///
+>                            xscale(range(48 60)) ///
+>                            xlabel(48(2)60) ///
+>                            legend(off) ///
+>                            graphregion(color(white)) bgcolor(white) ///
+>                            note("Trend statistically different from zero at the 5% level", size(2))
+{res}{txt}
+{com}.                 
+.                 * save graph physical development
+.                 graph save "$out_graph/physical_prop.gph", replace      
+{res}{txt}(file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/output/graphs/physical_prop.gph saved)
+
+{com}.                 
+.                 
+.                 * Line graph for learning
+.                 twoway (lfitci learning_prop age_months_rounded, color("222 235 247") lwidth(.05) lwidth(medium)) (lfit learning_prop age_months_rounded, color(red) lwidth(.5) lpattern(dash)) (line learning_prop age_months_rounded, msize(medium) color(edkblue)), ///
+>                            title("Learning Performance by Age in Months", size(3)) ///
+>                            ytitle("Proportion Meeting Milestones", size(2)) ///
+>                            xtitle("Age in Months", size(2)) ///
+>                            xscale(range(48 60)) ///
+>                            xlabel(48(2)60) ///
+>                            legend(off) ///
+>                            graphregion(color(white)) bgcolor(white) ///
+>                            note("Trend NOT statistically different from zero", size(2))
+{res}{txt}
+{com}.                 
+.                 * save graph learning achivements
+.                 graph save "$out_graph/learning_prop.gph", replace      
+{res}{txt}(file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/output/graphs/learning_prop.gph saved)
+
+{com}.                 
+.                 
+.                 * Line graph for socio-emotional development
+.                 twoway (lfitci socio_emotional_prop age_months_rounded, color("222 235 247") lwidth(.05) lwidth(medium)) (lfit socio_emotional_prop age_months_rounded, color(red) lwidth(.5) lpattern(dash)) (line socio_emotional_prop age_months_rounded, msize(medium) color(edkblue)), ///
+>                            title("Socio-emotional Development by Age in Months", size(3)) ///
+>                            ytitle("Proportion Meeting Milestones", size(2)) ///
+>                            xtitle("Age in Months", size(2)) ///
+>                            xscale(range(48 60)) ///
+>                            xlabel(48(2)60) ///
+>                            legend(off) ///
+>                            graphregion(color(white)) bgcolor(white) ///
+>                            note("Trend statistically different from zero at the 10% level", size(2))
+{res}{txt}
+{com}.                 
+.                 * save graph learning socio-emotional development
+.                 graph save "$out_graph/socio_emotional_prop.gph", replace               
+{res}{txt}(file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/output/graphs/socio_emotional_prop.gph saved)
+
+{com}. 
+. 
+.         *2.5. generate visualization
+.         
+.                 * Combine the graphs into panels
+.                 graph combine "$out_graph/literacy_math_prop.gph" "$out_graph/physical_prop.gph" "$out_graph/learning_prop.gph" "$out_graph/socio_emotional_prop.gph" , ///
+>                         title("Educational Performance Trends by Age in Months") ///
+>                         subtitle("Zimbabwe MICS6 Survey Data (2019)") ///
+>                         
+{res}{txt}
+{com}.                 * save and export combined graph of literacy and numeracy, physical development, socio-emotional development, and socio-emotional development
+.                 graph export "$out_graph/panel.png", replace
+{txt}(file C:\Users\Public\UNICEF\UNICEF-P3-assessment-public\Solution/output/graphs/panel.png written in PNG format)
+
+{com}.                 
+.                 capture log close
+{smcl}
+{com}{sf}{ul off}
